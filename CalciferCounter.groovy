@@ -6,9 +6,13 @@ import eu.mihosoft.vrl.v3d.svg.SVGLoad
 //println "Clearing the Vitamins cache to make sure current geometry is being used (only run this operation when the STL has changed)"
 //Vitamins.clear()
 
+println "Setting epsilons to try to export functional STLs"
+Plane.setEPSILON(1.0e-16);
+Vector3d.setEXPORTEPSILON(1.0e-2);
+
 CSG calcifer, counter, cutter, outline
 
-def name = calcifer
+def name = "calcifer"
 
 def repoName = "https://github.com/JansenSmith/CalciferCounter.git"
 def fileLoc = "calcifer/calcifer_mini_Front_30x40.stl"
@@ -50,14 +54,14 @@ outline = s.extrudeLayerToCSG(depth,"outside")
 
 println "Moving calcifer into position"
 calcifer = calcifer.roty(180).toZMin()
-				.movex(-8)
-				.movey(6)
+				.movex(-9.25)
+				.movey(9)
 
 println "Moving outline into position"
 outline = outline.roty(180).toZMin()
 				.toXMin().movex(calcifer.minX)
 				.toYMin().movey(calcifer.minY)
-				.movex(3)
+				.movex(3.25)
 				.movey(3.75)
 
 //return outline
@@ -65,6 +69,7 @@ outline = outline.roty(180).toZMin()
 println "Making outline slightly larger"
 outline = outline.hull()
 def outline_scale = 1.05
+//def outline_scale = 0.25
 def outline_posX = outline.centerX
 def outline_posY = outline.centerY
 outline = outline.movex(-outline_posX)
@@ -81,7 +86,11 @@ cutter = cutter.difference(outline)
 println "Trimming calcifer to outline"
 calcifer = calcifer.difference(cutter)
 
-//counter = counter.difference(cutter)
+println "Creating pocket in counter for calcifer"
+//counter = counter.difference(outline)
+
+println "Adding calcifer to counter"
+//counter = counter.union(calcifer)
 
 println "Setting CSG attributes"
 if (calcifer) {
@@ -91,7 +100,7 @@ if (calcifer) {
 				.setIsWireFrame(false)
 				.setManufacturing({ toMfg ->
 					return toMfg
-							//.rotx(180)// fix the orientation
+							.roty(180)// fix the orientation
 							//.toZMin()//move it down to the flat surface
 				})
 }
@@ -103,7 +112,7 @@ if (counter) {
 				.setIsWireFrame(false)
 				.setManufacturing({ toMfg ->
 					return toMfg
-							//.rotx(180)// fix the orientation
+							.roty(180)// fix the orientation
 							//.toZMin()//move it down to the flat surface
 				})
 }
@@ -136,5 +145,6 @@ if (outline) {
 //ret = [calcifer, counter]
 //ret = [calcifer, cutter, outline]
 ret = calcifer
+//ret = counter
 
 return ret
